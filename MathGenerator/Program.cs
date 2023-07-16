@@ -1,4 +1,6 @@
-﻿namespace MathGenerator
+﻿using System.Diagnostics;
+
+namespace MathGenerator
 {
     internal class Program
     {
@@ -6,7 +8,10 @@
         static void Main(string[] args)
         {
             Problem problem = new Problem();
-            PrintIntro();
+            Stopwatch sw = new Stopwatch();
+            float[] times = new float[NUM_QUESTIONS];
+            string[] allProblems = new string[NUM_QUESTIONS];
+
             int userInput = 0;
             int currentAnswer;
             int correctCounter = 0;
@@ -16,25 +21,32 @@
             {
                 // Display problem
                 Prompt(problem);
+                sw.Restart();
+                sw.Start();
                 // Vallidate input, reference userInput
                 while(!GetUserAnswer(ref userInput))
                 {
+                    sw.Stop();
                     Console.SetCursorPosition(Console.WindowWidth / 2 - 7, Console.WindowHeight / 2);
                     Console.Write("Invalid input!");
                     Thread.Sleep(1000);
                     Prompt(problem);
+                    sw.Start();
                 }
+                sw.Stop();
+                times[count] = (float)(sw.ElapsedMilliseconds / 1000.0f);
 
                 currentAnswer = problem.GetAnswer();
                 if(userInput == currentAnswer)
                 {
                     correctCounter++;
                 }
+                allProblems[count] = problem.GetProblem() + problem.GetAnswer().ToString();
 
                 problem = new Problem();
             }
 
-            WriteEndMessage(correctCounter);
+            WriteEndMessage(correctCounter, times, allProblems);
         }
 
         // Print permanent message centered at the top of the window
@@ -74,13 +86,39 @@
         }
 
         // Write out how many correct answers were recorded
-        static void WriteEndMessage(int counter)
+        static void WriteEndMessage(int counter, float[] times, string[] problems)
         {
+            string[,] endBlock = new string[NUM_QUESTIONS + 2, 1];
+            endBlock[0, 0] = "You got " + counter + " out of " + NUM_QUESTIONS;
+
+            int longestStringIndex = 0;
+            for(int count = 0; count < NUM_QUESTIONS; count++)
+            {
+                endBlock[count + 1,0] = "Question " + (count + 1) + ": " + problems[count]
+                    + " seconds to answer entry: " + times[count];
+                if (endBlock[longestStringIndex,0].Length < endBlock[count + 1, 0].Length)
+                {
+                    longestStringIndex = count + 1;
+                }
+            }
+            
+            float average = 0.0f;
+            for (int count = 0; count < times.Length; count++)
+            {
+                average += times[count];
+            }
+            average /= times.Length;
+            endBlock[endBlock.GetLength(0) - 1, 0] = "Average time in seconds: " + Math.Round(average,3);
+
             Console.Clear();
-            Console.SetCursorPosition(Console.WindowWidth / 2 - 10, Console.WindowHeight / 2);
-            Console.WriteLine("You got " + counter + " out of " + NUM_QUESTIONS);
+            for(int count = 0; count < endBlock.GetLength(0); count++)
+            {
+                Console.SetCursorPosition(Console.WindowWidth / 2 - (endBlock[count, 0].Length / 2), Console.WindowHeight / 2 + (endBlock.GetLength(0) + count));
+                Console.WriteLine(endBlock[count, 0]);
+            }
             Console.SetCursorPosition(0, Console.WindowHeight - 1);
             Console.ReadKey();
+
         }
     }
 }
