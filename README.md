@@ -6,6 +6,8 @@ The user is timed on each question that's made up of basic arithmetic (+, -, *, 
 
 Difficulty algorithm: difficulty is checked every fifth question and will increase the operand size by some amount if the users' average total perfomance is less than 5 seconds a question. Maxes out at 100.
 
+<img width="653" alt="Screenshot 2023-07-17 153156" src="https://github.com/joshGilstrap/MentalMathTrainer/assets/5957735/58e77e45-1ac7-43b9-a9c1-b61835f70099">
+
 Program.cs - The main driver of the program, look here for formatting and driving code
 
 Problem.cs - Problem class, creates everything about a generated question, also controls 
