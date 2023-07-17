@@ -1,4 +1,4 @@
-# MentalMathTrainer
+# Mental Math Trainer
 A C# console game aimed at sharpening mental math skills.
 
 Program.cs - The main driver of the program, look here for formatting and driving code
