@@ -9,7 +9,7 @@ namespace MathGenerator
     public class Problem
     {
         static int currentDifficulty;
-        static char[] operations = { '+', '-', '*', '/', '%' };
+        static char[] operations = { '+', '-', '*', '/', /*'%'*/ };
 
         Random random = new Random();
         int operandLeft;
@@ -32,7 +32,16 @@ namespace MathGenerator
         {
             return answer;
         }
+
+        public void IncreaseDifficulty()
+        {
+            currentDifficulty++;
+        }
         
+        public void DecreaseDifficulty()
+        {
+            currentDifficulty--;
+        }
         private void MakeProblem()
         {
             // Find the highest number possible
@@ -41,12 +50,6 @@ namespace MathGenerator
             // Assign left operand
             operandLeft = MakeOperand(topEnd);
             
-            // Randomly add "difficulty"
-            if(random.Next() % 5 == 0)
-            {
-                topEnd += 10;
-            }
-            
             // Choose an operation at random
             ChooseOperation();
             
@@ -54,7 +57,7 @@ namespace MathGenerator
             operandRight = MakeOperand(topEnd);
             if (operandRight == 0)
             {
-                operandRight += random.Next(1, 10);
+                operandRight += random.Next(1, topEnd);
             }
             
             // Solve problem and save answer
@@ -72,16 +75,16 @@ namespace MathGenerator
             switch (currentDifficulty)
             {
                 case 0:
-                    topEnd = 10;
+                    topEnd = 15;
                     break;
                 case 1:
-                    topEnd = 20;
-                    break;
-                case 2:
                     topEnd = 30;
                     break;
-                case 3:
+                case 2:
                     topEnd = 50;
+                    break;
+                case 3:
+                    topEnd = 75;
                     break;
                 case 4:
                     topEnd = 100;

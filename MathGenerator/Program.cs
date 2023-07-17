@@ -11,19 +11,27 @@ namespace MathGenerator
             Stopwatch sw = new Stopwatch();
             float[] times = new float[NUM_QUESTIONS];
             string[] allProblems = new string[NUM_QUESTIONS];
+            string[] userAnswers = new string[NUM_QUESTIONS];
 
             int userInput = 0;
             int currentAnswer;
             int correctCounter = 0;
 
+            //WIP
+            /*Console.SetWindowSize(Console.LargestWindowWidth / 3, Console.LargestWindowHeight / 3);
+            Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
+            Console.MoveBufferArea(Console.WindowLeft,\ Console.WindowTop, Console.WindowWidth, Console.WindowHeight, 0, 0);
+            Console.SetWindowPosition(0, 0);*/
+
+            PrintIntro();
+            Console.ReadKey();
             // Game loop
             for(int count = 0; count < NUM_QUESTIONS; count++)
             {
                 // Display problem
                 Prompt(problem);
                 sw.Restart();
-                sw.Start();
-                // Vallidate input, reference userInput
+                // Validate input, reference userInput
                 while(!GetUserAnswer(ref userInput))
                 {
                     sw.Stop();
@@ -42,11 +50,16 @@ namespace MathGenerator
                     correctCounter++;
                 }
                 allProblems[count] = problem.GetProblem() + problem.GetAnswer().ToString();
+                userAnswers[count] = userInput.ToString();
 
+                if((count + 1) % 5 == 0 && FindAverageTime(times) < 5.0f)
+                {
+                    problem.IncreaseDifficulty();
+                }
                 problem = new Problem();
             }
 
-            WriteEndMessage(correctCounter, times, allProblems);
+            WriteEndMessage(correctCounter, times, allProblems, userAnswers);
         }
 
         // Print permanent message centered at the top of the window
@@ -56,11 +69,14 @@ namespace MathGenerator
                 {"----------------------------"},
                 {"Welcome to the Math Trainer!"},
                 {"----------------------------"},
-                {"Exercise your mental math skills."}
+                {"Exercise your mental math skills."},
+                {"You're timed on each question."},
+                {"----------------------------"},
+                {"Current number of questions: " + NUM_QUESTIONS}
             };
             for(int count = 0; count < introBlock.GetLength(0); count++)
             {
-                Console.SetCursorPosition(Console.WindowWidth / 2 - (introBlock[count,0].Length / 2), Console.WindowTop + count);
+                Console.SetCursorPosition(Console.WindowWidth / 2 - (introBlock[count,0].Length / 2), Console.WindowTop + count + 10);
                 Console.Write(introBlock[count,0]);
             }
         }
@@ -81,12 +97,12 @@ namespace MathGenerator
         {
             Console.Clear();
             PrintIntro();
-            Console.SetCursorPosition(Console.WindowWidth / 2 - (problem.GetProblem().Length / 2), Console.WindowTop + 5);
+            Console.SetCursorPosition(Console.WindowWidth / 2 - (problem.GetProblem().Length / 2), Console.WindowHeight / 2);
             Console.Write(problem.GetProblem());
         }
 
         // Write out how many correct answers were recorded
-        static void WriteEndMessage(int counter, float[] times, string[] problems)
+        static void WriteEndMessage(int counter, float[] times, string[] problems, string[] answers)
         {
             string[,] endBlock = new string[NUM_QUESTIONS + 2, 1];
             endBlock[0, 0] = "You got " + counter + " out of " + NUM_QUESTIONS;
@@ -94,31 +110,37 @@ namespace MathGenerator
             int longestStringIndex = 0;
             for(int count = 0; count < NUM_QUESTIONS; count++)
             {
-                endBlock[count + 1,0] = "Question " + (count + 1) + ": " + problems[count]
-                    + " seconds to answer entry: " + times[count];
-                if (endBlock[longestStringIndex,0].Length < endBlock[count + 1, 0].Length)
+                endBlock[count + 1,0] = "Question " + (count + 1) + ": " + problems[count] + " | "
+                    + "Your answer: " + answers[count] + " | Seconds to answer entry: " + times[count];
+                if (endBlock[count + 1, 0].Length > endBlock[longestStringIndex, 0].Length)
                 {
                     longestStringIndex = count + 1;
                 }
             }
-            
+
+            float average = FindAverageTime(times);
+            endBlock[endBlock.GetLength(0) - 1, 0] = "Average time per question in seconds: " + Math.Round(average,3);
+
+            Console.Clear();
+            for(int count = 0; count < endBlock.GetLength(0); count++)
+            {
+                Console.SetCursorPosition(Console.WindowWidth / 2 - (endBlock[longestStringIndex, 0].Length / 2),
+                    Console.WindowHeight / 2 - (endBlock.GetLength(0) / 2) + count);
+                Console.WriteLine(endBlock[count, 0]);
+            }
+            Console.SetCursorPosition(0, Console.WindowHeight - 1);
+            Console.ReadKey();
+
+        }
+        static float FindAverageTime(float[] times)
+        {
             float average = 0.0f;
             for (int count = 0; count < times.Length; count++)
             {
                 average += times[count];
             }
             average /= times.Length;
-            endBlock[endBlock.GetLength(0) - 1, 0] = "Average time in seconds: " + Math.Round(average,3);
-
-            Console.Clear();
-            for(int count = 0; count < endBlock.GetLength(0); count++)
-            {
-                Console.SetCursorPosition(Console.WindowWidth / 2 - (endBlock[count, 0].Length / 2), Console.WindowHeight / 2 + (endBlock.GetLength(0) + count));
-                Console.WriteLine(endBlock[count, 0]);
-            }
-            Console.SetCursorPosition(0, Console.WindowHeight - 1);
-            Console.ReadKey();
-
+            return average;
         }
     }
 }
