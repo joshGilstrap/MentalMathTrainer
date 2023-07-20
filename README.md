@@ -12,4 +12,4 @@ Program.cs - The main driver of the program, look here for formatting and drivin
 
 Problem.cs - Problem class, creates everything about a generated question, also controls 
 
-The motivation behind this program is to aid math education and will continue to grow in that direction. A big roadblock in a lot of complex math classes is the added time necessary to perform arithmetic on paper or with a calculator. Learning mental math tricks and practicing is the way to get past the block which will allow for a more enjoyable learning process for 
+The motivation behind this program is to aid math education and will continue to grow in that direction. A big roadblock in a lot of complex math classes is the added time necessary to perform arithmetic on paper or with a calculator. Learning mental math tricks and practicing is a way to get past the block which will allow for a more enjoyable and engaged learning experience.
