@@ -4,33 +4,56 @@ namespace MathGenerator
 {
     internal class Program
     {
-        static int NUM_QUESTIONS = 5;
         static void Main(string[] args)
         {
             Problem problem = new Problem();
             Stopwatch sw = new Stopwatch();
-            float[] times = new float[NUM_QUESTIONS];
-            string[] allProblems = new string[NUM_QUESTIONS];
-            string[] userAnswers = new string[NUM_QUESTIONS];
+            float[] times;
+            string[] allProblems;
+            string[] userAnswers;
 
             int userInput = 0;
             int currentAnswer;
             int correctCounter = 0;
+            int numQuestions;
 
             //WIP
-            /*Console.SetWindowSize(Console.LargestWindowWidth / 3, Console.LargestWindowHeight / 3);
-            Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
-            Console.MoveBufferArea(Console.WindowLeft,\ Console.WindowTop, Console.WindowWidth, Console.WindowHeight, 0, 0);
-            Console.SetWindowPosition(0, 0);*/
+            //Console.SetWindowSize(Console.LargestWindowWidth / 2, Console.LargestWindowHeight);
+            //Console.SetBufferSize(Console.WindowWidth, Console.WindowHeight);
+            //Console.MoveBufferArea(Console.WindowLeft, Console.WindowTop, Console.WindowWidth, Console.WindowHeight, 0, 0);
+            //Console.SetWindowPosition(0, 0);
 
+            bool validInput = false;
+            do
+            {
+                Console.Clear();
+                PrintIntro();
+                Console.SetCursorPosition(Console.WindowWidth / 2 - 9, Console.WindowHeight / 2);
+                Console.Write("How many questions? ");
+                if (Int32.TryParse(Console.ReadLine(), out numQuestions))
+                {
+                    validInput = true;
+                }
+            } while (!validInput);
+
+            times = new float[numQuestions];
+            allProblems = new string[numQuestions];
+            userAnswers = new string[numQuestions];
+
+            Console.CursorVisible = false;
+            Console.Clear();
             PrintIntro();
+            Console.SetCursorPosition(Console.WindowWidth / 2 - 11, Console.WindowHeight / 2);
+            Console.Write("Press 'Enter' to start");
             Console.ReadKey();
+            Console.CursorVisible = true;
             // Game loop
-            for(int count = 0; count < NUM_QUESTIONS; count++)
+            for(int count = 0; count < numQuestions; count++)
             {
                 // Display problem
                 Prompt(problem);
                 sw.Restart();
+                Console.Write(sw.Elapsed.TotalSeconds);
                 // Validate input, reference userInput
                 while(!GetUserAnswer(ref userInput))
                 {
@@ -52,14 +75,14 @@ namespace MathGenerator
                 allProblems[count] = problem.GetProblem() + problem.GetAnswer().ToString();
                 userAnswers[count] = userInput.ToString();
 
+                // Increase difficulty every fifth question if user is performing well
                 if((count + 1) % 5 == 0 && FindAverageTime(times) < 5.0f)
                 {
                     problem.IncreaseDifficulty();
                 }
                 problem = new Problem();
             }
-
-            WriteEndMessage(correctCounter, times, allProblems, userAnswers);
+            WriteEndMessage(correctCounter, numQuestions, times, allProblems, userAnswers);
         }
 
         // Print permanent message centered at the top of the window
@@ -71,8 +94,7 @@ namespace MathGenerator
                 {"----------------------------"},
                 {"Exercise your mental math skills."},
                 {"You're timed on each question."},
-                {"----------------------------"},
-                {"Current number of questions: " + NUM_QUESTIONS}
+                {"----------------------------"}
             };
             for(int count = 0; count < introBlock.GetLength(0); count++)
             {
@@ -102,13 +124,13 @@ namespace MathGenerator
         }
 
         // Write out how many correct answers were recorded
-        static void WriteEndMessage(int counter, float[] times, string[] problems, string[] answers)
+        static void WriteEndMessage(int counter, int numQs, float[] times, string[] problems, string[] answers)
         {
-            string[,] endBlock = new string[NUM_QUESTIONS + 2, 1];
-            endBlock[0, 0] = "You got " + counter + " out of " + NUM_QUESTIONS;
+            string[,] endBlock = new string[numQs + 2, 1];
+            endBlock[0, 0] = "You got " + counter + " out of " + numQs;
 
             int longestStringIndex = 0;
-            for(int count = 0; count < NUM_QUESTIONS; count++)
+            for(int count = 0; count < numQs; count++)
             {
                 endBlock[count + 1,0] = "Question " + (count + 1) + ": " + problems[count] + " | "
                     + "Your answer: " + answers[count] + " | Seconds to answer entry: " + times[count];
