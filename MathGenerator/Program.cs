@@ -10,7 +10,7 @@ namespace MathGenerator
             Stopwatch sw = new Stopwatch();
             float[] times;
             string[] allProblems;
-            string[] userAnswers;
+            string[,] userAnswers;
 
             int userInput = 0;
             int currentAnswer;
@@ -38,7 +38,11 @@ namespace MathGenerator
 
             times = new float[numQuestions];
             allProblems = new string[numQuestions];
-            userAnswers = new string[numQuestions];
+            userAnswers = new string[numQuestions, 2];
+            for (int i = 0; i < userAnswers.GetLength(0); i++)
+            {
+                userAnswers[i, 1] = "i";
+            }
 
             Console.CursorVisible = false;
             Console.Clear();
@@ -53,7 +57,6 @@ namespace MathGenerator
                 // Display problem
                 Prompt(problem);
                 sw.Restart();
-                Console.Write(sw.Elapsed.TotalSeconds);
                 // Validate input, reference userInput
                 while(!GetUserAnswer(ref userInput))
                 {
@@ -71,9 +74,10 @@ namespace MathGenerator
                 if(userInput == currentAnswer)
                 {
                     correctCounter++;
+                    userAnswers[count, 1] = "c";
                 }
                 allProblems[count] = problem.GetProblem() + problem.GetAnswer().ToString();
-                userAnswers[count] = userInput.ToString();
+                userAnswers[count, 0] = userInput.ToString();
 
                 // Increase difficulty every fifth question if user is performing well
                 if((count + 1) % 5 == 0 && FindAverageTime(times) < 5.0f)
@@ -82,7 +86,10 @@ namespace MathGenerator
                 }
                 problem = new Problem();
             }
-            WriteEndMessage(correctCounter, numQuestions, times, allProblems, userAnswers);
+            //WriteEndMessage(correctCounter, numQuestions, times, allProblems, userAnswers);
+            NewEndMessage(correctCounter, numQuestions, times, allProblems, userAnswers);
+            Console.ResetColor();
+            Console.ReadKey();
         }
 
         // Print permanent message centered at the top of the window
@@ -98,8 +105,13 @@ namespace MathGenerator
             };
             for(int count = 0; count < introBlock.GetLength(0); count++)
             {
+                if(count == 0 || count == 2 || count == 5)
+                {
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                }
                 Console.SetCursorPosition(Console.WindowWidth / 2 - (introBlock[count,0].Length / 2), Console.WindowTop + count + 10);
                 Console.Write(introBlock[count,0]);
+                Console.ResetColor();
             }
         }
 
@@ -152,8 +164,49 @@ namespace MathGenerator
             }
             Console.SetCursorPosition(0, Console.WindowHeight - 1);
             Console.ReadKey();
-
         }
+
+        static void NewEndMessage(int counter, int numQs, float[] times, string[] problems, string[,] answers)
+        {
+            Console.Clear();
+            Console.Write("\n\n\n\tYou got ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write($"{counter}");
+
+            Console.ResetColor();
+            Console.Write(" out of ");
+
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.Write($"{numQs}");
+            Console.WriteLine();
+
+            Console.ResetColor();
+            for (int i = 0; i < numQs; i++)
+            {
+                Console.Write($"\t\tQuestion {i + 1}: {problems[i]}");
+                Console.Write(" | Your answer: ");
+                if (answers[i,1] == "i")
+                {
+                    Console.ForegroundColor = ConsoleColor.Red;
+                }
+                else
+                {
+                    Console.ForegroundColor = ConsoleColor.Blue;
+                }
+                Console.Write($"{answers[i, 0]}");
+                Console.ResetColor();
+                Console.Write(" | Your time: ");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"{times[i]}");
+                Console.ResetColor();
+            }
+            Console.Write("\tTotal average time: ");
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.Write($"{FindAverageTime(times)}");
+            Console.SetCursorPosition(0, Console.WindowHeight - 1);
+        }
+
         static float FindAverageTime(float[] times)
         {
             float average = 0.0f;
